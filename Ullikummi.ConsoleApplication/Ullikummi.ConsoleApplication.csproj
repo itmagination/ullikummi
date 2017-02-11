@@ -65,6 +65,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Antlr4 Include="DataFileGrammar.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Ullikummi</CustomToolNamespace>
+    </Antlr4>
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
