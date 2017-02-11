@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using System;
+using System.Linq;
 using Ullikummi.Data;
 using Ullikummi.Data.Edges;
 using Ullikummi.Data.Nodes;
@@ -52,6 +53,12 @@ namespace Ullikummi.DataReader
             if (!graph.Nodes.ContainsKey(nodeIdentifier))
             {
                 var node = new Node(nodeIdentifier);
+
+                if(node.IsStart && graph.Nodes.Values.Any(n => n.IsStart))
+                {
+                    throw new ApplicationException("Only single start state is allowed!");
+                }
+
                 graph.Nodes.Add(nodeIdentifier, node);
             }
         }
