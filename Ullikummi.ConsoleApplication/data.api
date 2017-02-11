@@ -1,0 +1,30 @@
+﻿!start -> alphaBetaGamma
+alphaBetaGamma -> alphaBeta [gamma]
+alphaBetaGamma -> betaGamma [alpha]
+alphaBetaGamma -> alphaGamma [beta]
+alphaBetaGamma -> $end
+alphaBeta -> alpha [beta]
+alphaBeta -> beta [alpha]
+alphaBeta -> $end
+alphaGamma -> alpha [gamma]
+alphaGamma -> gamma [alpha]
+alphaGamma -> $end
+betaGamma -> beta [gamma]
+betaGamma -> gamma [beta]
+betaGamma -> $end
+alpha -> empty [alpha]
+beta -> empty [beta]
+gamma -> empty [gamma]
+empty -> $end
+
+!start [name=Start]
+$end [name=End]
+//
+//alpha [name=Alpha params=string#name;string#surname]
+//beta [name=Beta params=string#address]
+//gamma [name=Gamma params=string#phoneNumber]
+//
+//Inne metadane?
+//
+//Pomysły i uwagi:
+//Wiele stanów akceptujących! Konfiguracja kończąca się innym obiektem.

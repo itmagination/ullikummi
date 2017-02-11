@@ -13,7 +13,15 @@ edges
    ;
 
 edge
-   : (START_STATE|IDENTIFIER) ARROW (END_STATE|IDENTIFIER) edge_identifier? NEW_LINE
+   : edge_start ARROW edge_end edge_identifier? NEW_LINE
+   ;
+
+edge_start
+   : START_STATE | IDENTIFIER
+   ;
+
+edge_end
+   : END_STATE | IDENTIFIER
    ;
 
 edge_identifier
@@ -55,7 +63,7 @@ empty_file
 // Tokens
 
 SINGLE_LINE_COMMENT
-   :	'//'  InputCharacter*   ->   channel(HIDDEN);
+   :	'//'  InputCharacter* NewLine?  ->   channel(HIDDEN);
 
 WHITESPACES				
    :   Whitespace+   ->   channel(HIDDEN);

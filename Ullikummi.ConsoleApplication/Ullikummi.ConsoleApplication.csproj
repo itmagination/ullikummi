@@ -64,6 +64,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="data.api">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
@@ -77,6 +80,16 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ullikummi.DataReader\Ullikummi.DataReader.csproj">
+      <Project>{c0458994-dcf6-498d-95db-cab4f69504d1}</Project>
+      <Name>Ullikummi.DataReader</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Ullikummi.Data\Ullikummi.Data.csproj">
+      <Project>{f7b44ccf-ecca-40ad-9a99-0bdbc0f3cf41}</Project>
+      <Name>Ullikummi.Data</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

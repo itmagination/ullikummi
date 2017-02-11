@@ -43,16 +43,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataFileGrammarVisitor.cs" />
+    <Compile Include="DataReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DataFileGrammarParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <Antlr4 Include="DataFileGrammar.g4">
       <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>Ullikummi</CustomToolNamespace>
+      <CustomToolNamespace>Ullikummi.DataReader</CustomToolNamespace>
     </Antlr4>
   </ItemGroup>
   <ItemGroup>
     <None Include="paket.references" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ullikummi.Data\Ullikummi.Data.csproj">
+      <Project>{f7b44ccf-ecca-40ad-9a99-0bdbc0f3cf41}</Project>
+      <Name>Ullikummi.Data</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Choose>
