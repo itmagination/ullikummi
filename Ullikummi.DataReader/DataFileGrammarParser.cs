@@ -4,14 +4,9 @@ namespace Ullikummi.DataReader
 {
     public partial class DataFileGrammarParser
     {
-        public partial class Edge_startContext
+        public partial class State_identifierContext
         {
-            public Node Node { get; set; }
-        }
-
-        public partial class Edge_endContext
-        {
-            public Node Node { get; set; }
+            public string StateIdentifier { get; set; }
         }
     }
 }

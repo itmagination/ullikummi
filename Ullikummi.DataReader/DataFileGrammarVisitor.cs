@@ -1,5 +1,6 @@
 ﻿using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
+using System;
 using Ullikummi.Data;
 using Ullikummi.Data.Edges;
 using Ullikummi.Data.Nodes;
@@ -21,53 +22,29 @@ namespace Ullikummi.DataReader
             return graph;
         }
 
-        public override Graph VisitEdge_start([NotNull] DataFileGrammarParser.Edge_startContext context)
-        {
-            var startNodeIdentifier = context.START_STATE()?.GetText();
-            var nodeIdentifier = context.IDENTIFIER()?.GetText();
-
-            if(startNodeIdentifier != null)
-            {
-                AddNodeIfNotExist(startNodeIdentifier);
-                context.Node = graph.Nodes[startNodeIdentifier];
-            }
-            if(nodeIdentifier != null)
-            {
-                AddNodeIfNotExist(nodeIdentifier);
-                context.Node = graph.Nodes[nodeIdentifier];
-            }
-
-            return base.VisitEdge_start(context);
-        }
-
-        public override Graph VisitEdge_end([NotNull] DataFileGrammarParser.Edge_endContext context)
-        {
-            var endNodeIdentifier = context.END_STATE()?.GetText();
-            var nodeIdentifier = context.IDENTIFIER()?.GetText();
-
-            if (endNodeIdentifier != null)
-            {
-                AddNodeIfNotExist(endNodeIdentifier);
-                context.Node = graph.Nodes[endNodeIdentifier];
-            }
-            if (nodeIdentifier != null)
-            {
-                AddNodeIfNotExist(nodeIdentifier);
-                context.Node = graph.Nodes[nodeIdentifier];
-            }
-
-            return base.VisitEdge_end(context);
-        }
-
         public override Graph VisitEdge([NotNull] DataFileGrammarParser.EdgeContext context)
         {
-            Visit(context.edge_start());
-            Visit(context.edge_end());
+            Visit(context.state_identifier(0));
+            Visit(context.state_identifier(1));
+            var startNodeIdentifier = context.state_identifier(0).StateIdentifier;
+            var endNodeIdentifier = context.state_identifier(1).StateIdentifier;
 
-            var edge = new Edge(null, context.edge_start().Node, context.edge_start().Node);
+            AddNodeIfNotExist(startNodeIdentifier);
+            AddNodeIfNotExist(endNodeIdentifier);
+
+            var edge = new Edge(null, graph.Nodes[startNodeIdentifier], graph.Nodes[endNodeIdentifier]);
             graph.Edges.Add(edge);
 
             return base.VisitEdge(context);
+        }
+
+        public override Graph VisitState_identifier([NotNull] DataFileGrammarParser.State_identifierContext context)
+        {
+            context.StateIdentifier = String.Concat(context.START_STATE_PREFIX()?.GetText() ?? String.Empty,
+                context.END_STATE_PREFIX()?.GetText() ?? String.Empty,
+                context.IDENTIFIER().GetText()
+                );
+            return base.VisitState_identifier(context);
         }
 
         private void AddNodeIfNotExist(string nodeIdentifier)
@@ -77,13 +54,6 @@ namespace Ullikummi.DataReader
                 var node = new Node(nodeIdentifier);
                 graph.Nodes.Add(nodeIdentifier, node);
             }
-        }
-
-        public override Graph VisitEdge_identifier([NotNull] DataFileGrammarParser.Edge_identifierContext context)
-        {
-            var edgeIdentifier = context.IDENTIFIER().GetText();
-            //TODO Pass edgeIdentifier up to edge.
-            return base.VisitEdge_identifier(context);
         }
     }
 }

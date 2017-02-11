@@ -13,18 +13,10 @@ edges
    ;
 
 edge
-   : edge_start ARROW edge_end edge_identifier? NEW_LINE
+   : state_identifier ARROW state_identifier connection_identity? NEW_LINE
    ;
 
-edge_start
-   : START_STATE | IDENTIFIER
-   ;
-
-edge_end
-   : END_STATE | IDENTIFIER
-   ;
-
-edge_identifier
+connection_identity
    : OPEN_BRACKET IDENTIFIER CLOSE_BRACKET
    ;
 
@@ -33,7 +25,13 @@ nodes_metadata
    ;
 
 node_metadata
-   : (START_STATE|END_STATE|IDENTIFIER) object_parameters NEW_LINE
+   : state_identifier object_parameters NEW_LINE
+   ;
+
+state_identifier
+   : START_STATE_PREFIX IDENTIFIER 
+   | END_STATE_PREFIX IDENTIFIER 
+   | IDENTIFIER
    ;
 
 edges_metadata
@@ -41,7 +39,7 @@ edges_metadata
    ;
 
 edge_metadata
-   : (IDENTIFIER) object_parameters NEW_LINE
+   : IDENTIFIER object_parameters NEW_LINE
    ;
 
 object_parameters
@@ -72,12 +70,12 @@ NEW_LINE
    :   NewLine;
 
 ARROW					:	  '->';
-START_STATE				:     '!start';
-END_STATE				:	  '$end';
 OPEN_BRACKET			:     '[';
 CLOSE_BRACKET			:     ']';
 ASSIGNMENT				:	  '=';
 COMMA					:	  ',';
+START_STATE_PREFIX		:	  '!';
+END_STATE_PREFIX		:	  '$';
 
 IDENTIFIER				:     '@'? IdentifierOrKeyword;
 
