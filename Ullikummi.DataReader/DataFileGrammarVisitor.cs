@@ -3,6 +3,7 @@ using Antlr4.Runtime.Tree;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Ullikummi.Data;
 using Ullikummi.Data.Connections;
 using Ullikummi.Data.Edges;
@@ -97,9 +98,46 @@ namespace Ullikummi.DataReader
 
         public override Graph VisitObject_parameter([NotNull] DataFileGrammarParser.Object_parameterContext context)
         {
-            context.Parameter = context.IDENTIFIER(0).GetText();
-            context.Value = context.IDENTIFIER(1).GetText();
+            context.Parameter = context.IDENTIFIER().GetText();
+
+            Visit(context.parameter_values());
+
+            context.Value = String.Join(context.parameter_values().Separator, context.parameter_values().Values);
+
             return base.VisitObject_parameter(context);
+        }
+
+        public override Graph VisitParameter_values([NotNull] DataFileGrammarParser.Parameter_valuesContext context)
+        {
+            string separator = String.Empty;
+            foreach (var semicolon in context.SEMICOLON())
+            {
+                separator = semicolon.GetText();
+            }
+
+            foreach(var parameterValue in context.parameter_value())
+            {
+                Visit(parameterValue);
+            }
+
+            context.Separator = separator;
+            context.Values = context.parameter_value().Select(parameterValue => String.Join(parameterValue.Separator, parameterValue.Values)).ToList();
+
+            return base.VisitParameter_values(context);
+        }
+
+        public override Graph VisitParameter_value([NotNull] DataFileGrammarParser.Parameter_valueContext context)
+        {
+            string separator = String.Empty;
+            foreach(var hash in context.HASH())
+            {
+                separator = hash.GetText();
+            }
+
+            context.Separator = separator;
+            context.Values = context.IDENTIFIER().Select(identifier => identifier.GetText()).ToList();
+
+            return base.VisitParameter_value(context);
         }
 
         public override Graph VisitObject_parameters([NotNull] DataFileGrammarParser.Object_parametersContext context)

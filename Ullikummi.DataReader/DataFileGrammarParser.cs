@@ -24,5 +24,17 @@ namespace Ullikummi.DataReader
         {
             public IDictionary<string, string> Parameters { get; set; }
         }
+
+        public partial class Parameter_valueContext
+        {
+            public string Separator { get; set; }
+            public IList<string> Values { get; set; }
+        }
+
+        public partial class Parameter_valuesContext
+        {
+            public string Separator { get; set; }
+            public IList<string> Values { get; set; }
+        }
     }
 }

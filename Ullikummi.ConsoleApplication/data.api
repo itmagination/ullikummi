@@ -20,9 +20,11 @@ empty -> $end
 !start [name=Start]
 $end [name=End]
 
-alpha [name=Alpha,params=string_name;string_surname]
-beta [name=Bet,params=string_address]
-gamma [name=Gamma,params=string_phoneNumber]
+alpha [name=Alpha,params=string#name;string#surname]
+beta [name=Bet,params=string#address]
+gamma [name=Gamma,params=string#phoneNumber]
+
+
 //
 //Inne metadane?
 //

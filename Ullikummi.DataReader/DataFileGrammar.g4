@@ -5,7 +5,7 @@ grammar DataFileGrammar;
 //
 
 data
-   : (empty_file | edges | edges NEW_LINE nodes_metadata | edges NEW_LINE nodes_metadata NEW_LINE connections_metadata) EOF
+   : (empty_file | edges | edges NEW_LINE+ nodes_metadata | edges NEW_LINE+ nodes_metadata NEW_LINE+ connections_metadata) NEW_LINE* EOF
    ;
 
 edges
@@ -47,7 +47,15 @@ object_parameters
    ;
 
 object_parameter
-   : IDENTIFIER ASSIGNMENT IDENTIFIER
+   : IDENTIFIER ASSIGNMENT parameter_values
+   ;
+
+parameter_values
+   : parameter_value (SEMICOLON parameter_value)*
+   ;
+
+parameter_value
+   : IDENTIFIER (HASH IDENTIFIER)*
    ;
 
 empty_file
@@ -76,6 +84,8 @@ ASSIGNMENT				:	  '=';
 COMMA					:	  ',';
 START_STATE_PREFIX		:	  '!';
 END_STATE_PREFIX		:	  '$';
+HASH					:	  '#';
+SEMICOLON				:	  ';';
 
 IDENTIFIER				:     '@'? IdentifierOrKeyword;
 
