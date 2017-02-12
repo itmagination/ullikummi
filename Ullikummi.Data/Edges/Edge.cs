@@ -1,18 +1,19 @@
 ﻿using System.Collections.Generic;
+using Ullikummi.Data.Connections;
 using Ullikummi.Data.Nodes;
 
 namespace Ullikummi.Data.Edges
 {
     public class Edge
     {
-        public string Identifier { get; private set; }
+        public Connection Connection { get; private set; }
         public Node Start { get; private set; }
         public Node End { get; private set; }
         public IDictionary<string, string> Properties { get; private set; }
 
-        public Edge(string identifier, Node start, Node end)
+        public Edge(Connection connection, Node start, Node end)
         {
-            Identifier = identifier;
+            Connection = connection;
             Start = start;
             End = end;
             Properties = new Dictionary<string, string>();

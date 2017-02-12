@@ -5,7 +5,7 @@ grammar DataFileGrammar;
 //
 
 data
-   : (empty_file | edges | edges NEW_LINE nodes_metadata | edges NEW_LINE nodes_metadata NEW_LINE edges_metadata) EOF
+   : (empty_file | edges | edges NEW_LINE nodes_metadata | edges NEW_LINE nodes_metadata NEW_LINE connections_metadata) EOF
    ;
 
 edges
@@ -34,11 +34,11 @@ state_identifier
    | IDENTIFIER
    ;
 
-edges_metadata
-   : edge_metadata+
+connections_metadata
+   : connection_metadata+
    ;
 
-edge_metadata
+connection_metadata
    : IDENTIFIER object_parameters NEW_LINE
    ;
 

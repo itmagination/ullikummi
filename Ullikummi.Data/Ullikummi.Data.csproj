@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Connections\Connection.cs" />
     <Compile Include="Graph.cs" />
     <Compile Include="Edges\Edge.cs" />
     <Compile Include="Nodes\Node.cs" />

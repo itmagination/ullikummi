@@ -16,7 +16,6 @@ namespace Ullikummi
             var graph = dataReader.ReadData(data);
 
             Console.WriteLine("Ullikummi!");
-
         }
     }
 }
