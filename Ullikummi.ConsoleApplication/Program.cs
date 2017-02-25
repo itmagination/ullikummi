@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Ullikummi.CodeGeneration;
 
 namespace Ullikummi
 {
@@ -15,7 +16,11 @@ namespace Ullikummi
 
             var graph = dataReader.ReadData(data);
 
+            var csharpCodeGenerator = new CSharpCodeGenerator();
+
             Console.WriteLine("Ullikummi!");
+
+            Console.WriteLine(csharpCodeGenerator.GenerateCode(graph));
         }
     }
 }

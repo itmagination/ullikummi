@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Ullikummi.Data.Connections
 {
@@ -10,7 +11,7 @@ namespace Ullikummi.Data.Connections
         public Connection(string identifier)
         {
             Identifier = identifier;
-            Properties = new Dictionary<string, string>();
+            Properties = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
         }
     }
 }

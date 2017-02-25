@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Ullikummi.Data.Connections;
 using Ullikummi.Data.Nodes;
 
@@ -16,7 +17,7 @@ namespace Ullikummi.Data.Edges
             Connection = connection;
             Start = start;
             End = end;
-            Properties = new Dictionary<string, string>();
+            Properties = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
         }
     }
 }

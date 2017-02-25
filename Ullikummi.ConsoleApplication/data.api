@@ -29,7 +29,7 @@ configure [name=Configure]
 
 namespace Ullikummi.FluentApi
 name IdentityBuilder
-access internal
+accessibility internal
 using System
 using System.Linq
 

@@ -2,3 +2,6 @@ source https://nuget.org/api/v2
 
 // NuGet packages
 nuget Antlr4
+nuget Microsoft.CodeAnalysis
+nuget Microsoft.CodeAnalysis.CSharp
+nuget Microsoft.CodeAnalysis.VisualBasic 

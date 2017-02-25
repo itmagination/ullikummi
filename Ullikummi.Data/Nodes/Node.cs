@@ -17,7 +17,7 @@ namespace Ullikummi.Data.Nodes
             IsStart = IsStartStateIdentifier(identifier);
             IsEnd = IsEndStateIdentifier(identifier);
 
-            Properties = new Dictionary<string, string>();
+            Properties = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
         }
 
         private bool IsStartStateIdentifier(string identifier)
