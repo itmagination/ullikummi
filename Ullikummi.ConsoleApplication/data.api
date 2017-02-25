@@ -1,32 +1,36 @@
-﻿!start -> alphaBetaGamma
-alphaBetaGamma -> alphaBeta [gamma]
-alphaBetaGamma -> betaGamma [alpha]
-alphaBetaGamma -> alphaGamma [beta]
-alphaBetaGamma -> $end
-alphaBeta -> alpha [beta]
-alphaBeta -> beta [alpha]
-alphaBeta -> $end
-alphaGamma -> alpha [gamma]
-alphaGamma -> gamma [alpha]
-alphaGamma -> $end
-betaGamma -> beta [gamma]
-betaGamma -> gamma [beta]
-betaGamma -> $end
-alpha -> empty [alpha]
-beta -> empty [beta]
-gamma -> empty [gamma]
-empty -> $end
+﻿!start -> AlphaBetaGamma [configure]
+AlphaBetaGamma -> AlphaBeta [gamma]
+AlphaBetaGamma -> BetaGamma [alpha]
+AlphaBetaGamma -> AlphaGamma [beta]
+AlphaBetaGamma -> $end
+AlphaBeta -> Alpha [beta]
+AlphaBeta -> Beta [alpha]
+AlphaBeta -> $end
+AlphaGamma -> Alpha [gamma]
+AlphaGamma -> Gamma [alpha]
+AlphaGamma -> $end
+BetaGamma -> Beta [gamma]
+BetaGamma -> Gamma [beta]
+BetaGamma -> $end
+Alpha -> Empty [alpha]
+Alpha -> $end
+Beta -> Empty [beta]
+Beta -> $end
+Gamma -> Empty [gamma]
+Gamma -> $end
+Empty -> $end
 
-!start [name=Start]
-$end [name=End]
+$end [name=Build,returnType=Identity]
 
 alpha [name=Alpha,params=string#name;string#surname]
-beta [name=Bet,params=string#address]
+beta [name=Beta,params=string#address]
 gamma [name=Gamma,params=string#phoneNumber]
+configure [name=Configure]
 
+namespace Ullikummi.FluentApi
+name IdentityBuilder
+access internal
+using System
 
-//
-//Inne metadane?
-//
-//Pomysły i uwagi:
-//Wiele stanów akceptujących! Konfiguracja kończąca się innym obiektem.
+//Ideas and remarks:
+// - Abbreviated states.
