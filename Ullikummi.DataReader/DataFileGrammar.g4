@@ -5,7 +5,13 @@ grammar DataFileGrammar;
 //
 
 data
-   : (empty_file | edges | edges NEW_LINE+ nodes_metadata | edges NEW_LINE+ nodes_metadata NEW_LINE+ connections_metadata) NEW_LINE* EOF
+   : 
+      (empty_file 
+	   | edges 
+	   | edges NEW_LINE+ nodes_metadata 
+	   | edges NEW_LINE+ nodes_metadata NEW_LINE+ connections_metadata
+	   | edges NEW_LINE+ nodes_metadata NEW_LINE+ connections_metadata NEW_LINE+ file_metadata
+	  ) NEW_LINE* EOF
    ;
 
 edges
@@ -42,6 +48,14 @@ connection_metadata
    : IDENTIFIER object_parameters NEW_LINE
    ;
 
+file_metadata
+   : file_metadatum+
+   ;
+
+file_metadatum
+   : IDENTIFIER parameter_simple_value NEW_LINE
+   ;
+
 object_parameters
    : OPEN_BRACKET object_parameter (COMMA object_parameter)* CLOSE_BRACKET
    ;
@@ -51,11 +65,15 @@ object_parameter
    ;
 
 parameter_values
-   : parameter_value (SEMICOLON parameter_value)*
+   : parameter_complex_value (SEMICOLON parameter_complex_value)*
    ;
 
-parameter_value
-   : IDENTIFIER (HASH IDENTIFIER)*
+parameter_complex_value
+   : parameter_simple_value (HASH parameter_simple_value)*
+   ;
+
+parameter_simple_value
+   : IDENTIFIER (DOT IDENTIFIER)*
    ;
 
 empty_file
@@ -86,6 +104,7 @@ START_STATE_PREFIX		:	  '!';
 END_STATE_PREFIX		:	  '$';
 HASH					:	  '#';
 SEMICOLON				:	  ';';
+DOT						:	  '.';
 
 IDENTIFIER				:     '@'? IdentifierOrKeyword;
 

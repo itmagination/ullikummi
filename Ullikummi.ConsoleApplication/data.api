@@ -20,7 +20,7 @@ Gamma -> Empty [gamma]
 Gamma -> $end
 Empty -> $end
 
-$end [name=Build,returnType=Identity]
+$end [name=Build,return=Identity]
 
 alpha [name=Alpha,params=string#name;string#surname]
 beta [name=Beta,params=string#address]
@@ -31,6 +31,8 @@ namespace Ullikummi.FluentApi
 name IdentityBuilder
 access internal
 using System
+using System.Linq
 
 //Ideas and remarks:
 // - Abbreviated states.
+// - Support for generic types (Have to extend grammar).

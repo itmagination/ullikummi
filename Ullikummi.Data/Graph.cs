@@ -10,12 +10,14 @@ namespace Ullikummi.Data
         public IDictionary<string, Node> Nodes { get; set; }
         public IList<Edge> Edges { get; set; }
         public IDictionary<string, Connection> Connections { get; set; }
+        public IDictionary<string, string> Metadata { get; set; }
 
         public Graph()
         {
             Nodes = new Dictionary<string, Node>();
             Edges = new List<Edge>();
             Connections = new Dictionary<string, Connection>();
+            Metadata = new Dictionary<string, string>();
         }
     }
 }

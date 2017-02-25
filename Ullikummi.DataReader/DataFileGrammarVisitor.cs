@@ -3,7 +3,6 @@ using Antlr4.Runtime.Tree;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Ullikummi.Data;
 using Ullikummi.Data.Connections;
 using Ullikummi.Data.Edges;
@@ -115,18 +114,17 @@ namespace Ullikummi.DataReader
                 separator = semicolon.GetText();
             }
 
-            foreach(var parameterValue in context.parameter_value())
+            foreach(var parameterComplexValue in context.parameter_complex_value())
             {
-                Visit(parameterValue);
+                Visit(parameterComplexValue);
             }
-
             context.Separator = separator;
-            context.Values = context.parameter_value().Select(parameterValue => String.Join(parameterValue.Separator, parameterValue.Values)).ToList();
+            context.Values = context.parameter_complex_value().Select(parameterValue => String.Join(parameterValue.Separator, parameterValue.Values)).ToList();
 
             return base.VisitParameter_values(context);
         }
 
-        public override Graph VisitParameter_value([NotNull] DataFileGrammarParser.Parameter_valueContext context)
+        public override Graph VisitParameter_complex_value([NotNull] DataFileGrammarParser.Parameter_complex_valueContext context)
         {
             string separator = String.Empty;
             foreach(var hash in context.HASH())
@@ -134,10 +132,29 @@ namespace Ullikummi.DataReader
                 separator = hash.GetText();
             }
 
+            foreach(var parameterSimpleValue in context.parameter_simple_value())
+            {
+                Visit(parameterSimpleValue);
+            }
+
+            context.Separator = separator;
+            context.Values = context.parameter_simple_value().Select(parameterValue => String.Join(parameterValue.Separator, parameterValue.Values)).ToList();
+
+            return base.VisitParameter_complex_value(context);
+        }
+
+        public override Graph VisitParameter_simple_value([NotNull] DataFileGrammarParser.Parameter_simple_valueContext context)
+        {
+            string separator = String.Empty;
+            foreach(var dot in context.DOT())
+            {
+                separator = dot.GetText();
+            }
+
             context.Separator = separator;
             context.Values = context.IDENTIFIER().Select(identifier => identifier.GetText()).ToList();
 
-            return base.VisitParameter_value(context);
+            return base.VisitParameter_simple_value(context);
         }
 
         public override Graph VisitObject_parameters([NotNull] DataFileGrammarParser.Object_parametersContext context)
@@ -195,6 +212,28 @@ namespace Ullikummi.DataReader
             }
 
             return base.VisitConnection_metadata(context);
+        }
+
+        public override Graph VisitFile_metadatum([NotNull] DataFileGrammarParser.File_metadatumContext context)
+        {
+            const string metadataSeparator = "&";
+
+            var metadatumName = context.IDENTIFIER().GetText();
+
+            Visit(context.parameter_simple_value());
+
+            var value = String.Join(context.parameter_simple_value().Separator, context.parameter_simple_value().Values);
+
+            if(graph.Metadata.ContainsKey(metadatumName))
+            {
+                graph.Metadata[metadatumName] = String.Concat(graph.Metadata[metadatumName], metadataSeparator, value);
+            }
+            else
+            {
+                graph.Metadata[metadatumName] = value;
+            }
+
+            return base.VisitFile_metadatum(context);
         }
     }
 }
