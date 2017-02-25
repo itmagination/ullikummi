@@ -17,10 +17,14 @@ namespace Ullikummi
             var graph = dataReader.ReadData(data);
 
             var csharpCodeGenerator = new CSharpCodeGenerator();
+            var visualBasicCodeGenerator = new VisualBasicCodeGenerator();
 
             Console.WriteLine("Ullikummi!");
 
+            Console.WriteLine();
             Console.WriteLine(csharpCodeGenerator.GenerateCode(graph));
+            Console.WriteLine();
+            Console.WriteLine(visualBasicCodeGenerator.GenerateCode(graph));
         }
     }
 }

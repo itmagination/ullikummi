@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Editing;
 using Ullikummi.Data;
+using Microsoft.CodeAnalysis.CSharp;
+using Ullikummi.Data.Connections;
 
 namespace Ullikummi.CodeGeneration
 {
@@ -17,12 +20,32 @@ namespace Ullikummi.CodeGeneration
 
             public const string UsingNamespaceSeparator = "&";
         }
+
+        public class ConnectionProperties
+        {
+            public const string Name = "name";
+            public const string Parameters = "params";
+
+            public const string ValuesSeparator = ";";
+            public const string ComplexValueSeparator = "#";
+        }
     }
 
     public static class GraphExtensions
     {
+        public const string DefaultName = "Ullikummi";
         public const string DefaultNamespace = "Ullikummi";
         public const Accessibility DefaultAccessibility = Accessibility.Public;
+
+        public static string GetName(this Graph graph)
+        {
+            if(!graph.Metadata.ContainsKey(GraphConst.Metadata.Name))
+            {
+                return DefaultName;
+            }
+
+            return graph.Metadata[GraphConst.Metadata.Name];
+        }
 
         public static IList<string> GetUsings(this Graph graph)
         {
@@ -65,31 +88,137 @@ namespace Ullikummi.CodeGeneration
         }
     }
 
-    public class RoslynCodeGenerator
+    internal static class ConnectionExtensions
     {
-        public class Parameters
+        public static string GetName(this Connection connection)
+        {
+            if (!connection.Properties.ContainsKey(GraphConst.ConnectionProperties.Name))
+            {
+                throw new ApplicationException($"Name was not defined for connection '{connection.Identifier}'.");
+            }
+
+            return connection.Properties[GraphConst.ConnectionProperties.Name];
+        }
+
+        public class ParameterPair
         {
             public string Type { get; set; }
             public string Name { get; set; }
         }
 
-        public class MethodDescription
+        public static IList<ParameterPair> GetParameters(this Connection connection)
         {
-            public string ReturnType { get; set; }
-            public string Name { get; set; }
-            public IList<Parameters> Parameters { get; set; }
-
-            public MethodDescription()
+            if(!connection.Properties.ContainsKey(GraphConst.ConnectionProperties.Parameters))
             {
-                Parameters = new List<Parameters>();
+                return new List<ParameterPair>();
+            }
+
+            var result = new List<ParameterPair>();
+
+            var joinedParams = connection.Properties[GraphConst.ConnectionProperties.Parameters];
+
+            return joinedParams.Split(new[] { GraphConst.ConnectionProperties.ValuesSeparator }, StringSplitOptions.None)
+                .Select(complexValue =>
+                {
+                    var simpleValues = complexValue.Split(new[] { GraphConst.ConnectionProperties.ComplexValueSeparator }, StringSplitOptions.None);
+                    if (simpleValues.Count() < 2)
+                    {
+                        throw new ApplicationException($"Parameters list in connection '{connection.Identifier}' is malformed!");
+                    }
+
+                    var parameterPair = new ParameterPair()
+                    {
+                        Type = simpleValues[0],
+                        Name = simpleValues[1]
+                    };
+
+                    return parameterPair;
+                })
+                .ToList();
+        }
+    }
+
+    public class RoslynCodeGenerator
+    {
+        public interface ICanConvertToSyntaxNode
+        {
+            SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator);
+        }
+
+        public class Parameter : ICanConvertToSyntaxNode
+        {
+            public TypeName Type { get; set; }
+            public string Name { get; set; }
+
+            public SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
+            {
+                return syntaxGenerator.ParameterDeclaration(Name, Type.ToSyntaxNode(syntaxGenerator));
             }
         }
 
-        public class Type
+        public class TypeName : ICanConvertToSyntaxNode
+        {
+            public string Name { get; set; }
+
+            private static readonly IReadOnlyDictionary<string, SpecialType> SpecialTypesMap = new Dictionary<string, SpecialType>
+            {
+                { "bool", SpecialType.System_Boolean },
+                { "byte", SpecialType.System_Byte },
+                { "sbyte", SpecialType.System_SByte },
+                { "char", SpecialType.System_Char },
+                { "decimal", SpecialType.System_Decimal },
+                { "double", SpecialType.System_Double },
+                { "float", SpecialType.System_Single },
+                { "int", SpecialType.System_Int32 },
+                { "uint", SpecialType.System_UInt32 },
+                { "long", SpecialType.System_Int64 },
+                { "ulong", SpecialType.System_UInt64 },
+                { "object", SpecialType.System_Object },
+                { "short", SpecialType.System_Int16 },
+                { "ushort", SpecialType.System_UInt16 },
+                { "string", SpecialType.System_String },
+            };
+
+            public SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
+            {
+                if (SpecialTypesMap.ContainsKey(Name))
+                {
+                    return syntaxGenerator.TypeExpression(SpecialTypesMap[Name]);
+                }
+
+                return syntaxGenerator.IdentifierName(Name);
+            }
+        }
+
+
+        public class MethodDescription : ICanConvertToSyntaxNode
+        {
+            public TypeName ReturnType { get; set; }
+            public string Name { get; set; }
+            public IList<Parameter> Parameters { get; set; }
+            public Accessibility Accessibility { get; set; }
+
+            public MethodDescription()
+            {
+                Parameters = new List<Parameter>();
+            }
+
+            public SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
+            {
+                var parametersSyntaxNodes = Parameters.Select(parameter => parameter.ToSyntaxNode(syntaxGenerator));
+
+                return syntaxGenerator.MethodDeclaration(Name, parametersSyntaxNodes, 
+                    returnType: ReturnType.ToSyntaxNode(syntaxGenerator), 
+                    accessibility: Accessibility);
+            }
+        }
+
+        public class Type : ICanConvertToSyntaxNode
         {
             protected string _name;
             public IList<MethodDescription> Methods { get; set; }
             public IList<Type> InternalTypes { get; set; }
+            public Accessibility Accessibility { get; set; }
 
             public virtual string Name
             {
@@ -102,6 +231,14 @@ namespace Ullikummi.CodeGeneration
                 Methods = new List<MethodDescription>();
                 InternalTypes = new List<Type>();
             }
+
+            public virtual SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
+            {
+                var methodsSyntaxNodes = Methods.Select(method => method.ToSyntaxNode(syntaxGenerator));
+                var internalTypesSyntaxNodes = InternalTypes.Select(internalType => internalType.ToSyntaxNode(syntaxGenerator));
+
+                return syntaxGenerator.ClassDeclaration(Name, accessibility: Accessibility, members: methodsSyntaxNodes.Union(internalTypesSyntaxNodes));
+            }
         }
 
         public class Interface : Type
@@ -109,7 +246,14 @@ namespace Ullikummi.CodeGeneration
             public override string Name
             {
                 get { return String.Concat("I", _name); }
-            } 
+            }
+
+            public override SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
+            {
+                var methodsSyntaxNodes = Methods.Select(method => method.ToSyntaxNode(syntaxGenerator));
+
+                return syntaxGenerator.InterfaceDeclaration(Name, accessibility: Accessibility, members: methodsSyntaxNodes);
+            }
         }
 
         public class CodeFile
@@ -117,7 +261,6 @@ namespace Ullikummi.CodeGeneration
             public IList<string> Usings { get; set; }
             public string Namespace { get; set; }
             public IList<Type> Types { get; set; }
-            public Accessibility Accessibility { get; set; }
 
             public CodeFile()
             {
@@ -125,6 +268,8 @@ namespace Ullikummi.CodeGeneration
                 Types = new List<Type>();
             }
         }
+
+        private const string TransitionsClassNameSufix = "Transitions";
 
         public CodeFile TranslateGraphToCodeFile(Graph graph)
         {
@@ -137,7 +282,70 @@ namespace Ullikummi.CodeGeneration
 
             codeFile.Usings = graph.GetUsings();
             codeFile.Namespace = graph.GetNamespace();
-            codeFile.Accessibility = graph.GetAccessibility();
+
+            var name = graph.GetName();
+            var accessibility = graph.GetAccessibility();
+
+            var transitionsClass = new Type()
+            {
+                Name = String.Concat(name, TransitionsClassNameSufix),
+                Accessibility = accessibility
+            };
+
+
+            var interfaces = new Dictionary<string, Interface>();
+
+            foreach(var edge in graph.Edges)
+            {
+                if(edge.Start.IsStart)
+                {
+                    continue;
+                }
+
+                if(edge.End.IsEnd)
+                {
+                    //TODO
+                    continue;
+                }
+
+                if (!interfaces.ContainsKey(edge.Start.Identifier))
+                {
+                    interfaces.Add(edge.Start.Identifier, new Interface()
+                    {
+                        Name = edge.Start.Identifier,
+                        Accessibility = Accessibility.Public
+                    });
+                }
+
+                var @interface = interfaces[edge.Start.Identifier];
+
+                var method = new MethodDescription()
+                {
+                    Name = edge.Connection.GetName(),
+                    ReturnType = new TypeName() { Name = String.Concat("I", edge.End.Identifier) }
+                };
+
+                var parameterPairs = edge.Connection.GetParameters();
+
+                foreach(var parameterPair in parameterPairs)
+                {
+                    var parameter = new Parameter
+                    {
+                        Type = new TypeName() { Name = parameterPair.Type },
+                        Name = parameterPair.Name
+                    };
+                    method.Parameters.Add(parameter);
+                }
+
+                @interface.Methods.Add(method);
+            }
+
+            foreach(var @interface in interfaces.Values)
+            {
+                transitionsClass.InternalTypes.Add(@interface);
+            }
+
+            codeFile.Types.Add(transitionsClass);
 
             return codeFile;
         }
@@ -163,40 +371,21 @@ namespace Ullikummi.CodeGeneration
 
             var syntaxNodes = new List<SyntaxNode>();
 
+
             // Create using/Imports directives
-            foreach(var @namespace in codeFile.Usings)
+            foreach (var @namespace in codeFile.Usings)
             {
                 syntaxNodes.Add(generator.NamespaceImportDeclaration(@namespace));
             }
 
-            var namespaceDeclaration = generator.NamespaceDeclaration(codeFile.Namespace);
+            var typesSyntaxNodes = codeFile.Types.Select(type => type.ToSyntaxNode(generator));
+
+            var namespaceDeclaration = generator.NamespaceDeclaration(codeFile.Namespace, typesSyntaxNodes);
             syntaxNodes.Add(namespaceDeclaration);
 
             var compilationUnit = generator.CompilationUnit(syntaxNodes).NormalizeWhitespace();
 
             return compilationUnit.ToFullString();
-
-            //var internalStateInterfaces = new Dictionary<string, SyntaxNode>();
-
-            //foreach(var edge in graph.Edges)
-            //{
-            //    if(edge.Connection != null)
-            //    {
-            //        var interfaceNameWithoutPrefix = edge.Start.Identifier;
-
-            //        SyntaxNode interfaceDeclaration = null;
-            //        internalStateInterfaces.TryGetValue(interfaceNameWithoutPrefix, out interfaceDeclaration);
-            //        if(interfaceDeclaration == null)
-            //        {
-            //            var interfaceName = String.Concat("I", interfaceNameWithoutPrefix);
-
-            //            interfaceDeclaration = generator.InterfaceDeclaration(interfaceName, null, Accessibility.Public);
-
-            //            interfaceDeclaration.ReplaceNodes()
-
-            //        }
-            //    }
-            //}
         }
     }
 }
