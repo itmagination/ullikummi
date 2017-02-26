@@ -52,6 +52,8 @@
     <Compile Include="Objective\Roslyn\Extensions\ConnectionExtensions.cs" />
     <Compile Include="Objective\Roslyn\Extensions\GraphExtensions.cs" />
     <Compile Include="Objective\Roslyn\Code\ParameterPair.cs" />
+    <Compile Include="Objective\Roslyn\Extensions\NodeExtensions.cs" />
+    <Compile Include="Objective\Roslyn\Extensions\PropertiesHelper.cs" />
     <Compile Include="Objective\Roslyn\GraphTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reference.cs" />

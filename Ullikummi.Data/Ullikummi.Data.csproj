@@ -45,6 +45,7 @@
     <Compile Include="Graph.cs" />
     <Compile Include="Edges\Edge.cs" />
     <Compile Include="GraphConst.cs" />
+    <Compile Include="IConfigurable.cs" />
     <Compile Include="Nodes\Node.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

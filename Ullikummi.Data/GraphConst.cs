@@ -2,7 +2,7 @@
 {
     public static class GraphConst
     {
-        public class Metadata
+        public static class Metadata
         {
             public const string Name = "name";
             public const string Namespace = "namespace";
@@ -12,13 +12,14 @@
             public const string UsingNamespaceSeparator = "&";
         }
 
-        public class ConnectionProperties
+        public static class Properties
         {
             public const string Name = "name";
             public const string Parameters = "params";
+            public const string Return = "return";
 
-            public const string ValuesSeparator = ";";
-            public const string ComplexValueSeparator = "#";
+            public const string PropertyValuesSeparator = ";";
+            public const string PropertyComplexValueSeparator = "#";
         }
     }
 }

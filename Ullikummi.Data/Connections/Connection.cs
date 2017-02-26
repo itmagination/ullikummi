@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Ullikummi.Data.Connections
 {
-    public class Connection
+    public class Connection : IConfigurable
     {
         public string Identifier { get; private set; }
         public IDictionary<string, string> Properties { get; private set; }

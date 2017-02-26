@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Ullikummi.Data.Nodes
 {
-    public class Node
+    public class Node : IConfigurable
     {
         public string Identifier { get; private set; }
         public bool IsStart { get; private set; }
