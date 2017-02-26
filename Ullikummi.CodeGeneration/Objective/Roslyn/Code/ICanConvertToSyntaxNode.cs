@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Editing;
 
 namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
 {
-    public interface ICanConvertToSyntaxNode
+    internal interface ICanConvertToSyntaxNode
     {
         SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator);
     }

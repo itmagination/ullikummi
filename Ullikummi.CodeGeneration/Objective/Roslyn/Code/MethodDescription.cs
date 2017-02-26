@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Editing;
 
 namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
 {
-    public class MethodDescription : ICanConvertToSyntaxNode
+    internal class MethodDescription : ICanConvertToSyntaxNode
     {
         public TypeName ReturnType { get; set; }
         public string Name { get; set; }

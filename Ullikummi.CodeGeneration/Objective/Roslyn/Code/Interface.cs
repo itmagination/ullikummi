@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Editing;
 
 namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
 {
-    public class Interface : Type
+    internal class Interface : Type
     {
         public override string Name
         {

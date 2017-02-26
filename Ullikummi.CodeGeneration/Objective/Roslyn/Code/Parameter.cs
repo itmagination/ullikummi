@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Editing;
 
 namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
 {
-    public class Parameter : ICanConvertToSyntaxNode
+    internal class Parameter : ICanConvertToSyntaxNode
     {
         public TypeName Type { get; set; }
         public string Name { get; set; }

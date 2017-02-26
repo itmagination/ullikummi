@@ -2,7 +2,7 @@
 
 namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
 {
-    public class CodeFile
+    internal class CodeFile
     {
         public IList<string> Usings { get; set; }
         public string Namespace { get; set; }

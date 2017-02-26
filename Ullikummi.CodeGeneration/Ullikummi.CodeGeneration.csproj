@@ -49,6 +49,9 @@
     <Compile Include="Objective\Roslyn\Code\MethodDescription.cs" />
     <Compile Include="Objective\Roslyn\Code\Parameter.cs" />
     <Compile Include="Objective\Roslyn\Code\TypeName.cs" />
+    <Compile Include="Objective\Roslyn\Extensions\ConnectionExtensions.cs" />
+    <Compile Include="Objective\Roslyn\Extensions\GraphExtensions.cs" />
+    <Compile Include="Objective\Roslyn\Code\ParameterPair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reference.cs" />
     <Compile Include="RoslynCodeGenerator.cs" />
