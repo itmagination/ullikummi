@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.Editing;
 using Ullikummi.Data;
 using Microsoft.CodeAnalysis.CSharp;
 using Ullikummi.Data.Connections;
+using Ullikummi.CodeGeneration.Objective.Roslyn.Code;
 
 namespace Ullikummi.CodeGeneration
 {
@@ -138,137 +139,8 @@ namespace Ullikummi.CodeGeneration
         }
     }
 
-    public class RoslynCodeGenerator
+    public partial class RoslynCodeGenerator
     {
-        public interface ICanConvertToSyntaxNode
-        {
-            SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator);
-        }
-
-        public class Parameter : ICanConvertToSyntaxNode
-        {
-            public TypeName Type { get; set; }
-            public string Name { get; set; }
-
-            public SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
-            {
-                return syntaxGenerator.ParameterDeclaration(Name, Type.ToSyntaxNode(syntaxGenerator));
-            }
-        }
-
-        public class TypeName : ICanConvertToSyntaxNode
-        {
-            public string Name { get; set; }
-
-            private static readonly IReadOnlyDictionary<string, SpecialType> SpecialTypesMap = new Dictionary<string, SpecialType>
-            {
-                { "bool", SpecialType.System_Boolean },
-                { "byte", SpecialType.System_Byte },
-                { "sbyte", SpecialType.System_SByte },
-                { "char", SpecialType.System_Char },
-                { "decimal", SpecialType.System_Decimal },
-                { "double", SpecialType.System_Double },
-                { "float", SpecialType.System_Single },
-                { "int", SpecialType.System_Int32 },
-                { "uint", SpecialType.System_UInt32 },
-                { "long", SpecialType.System_Int64 },
-                { "ulong", SpecialType.System_UInt64 },
-                { "object", SpecialType.System_Object },
-                { "short", SpecialType.System_Int16 },
-                { "ushort", SpecialType.System_UInt16 },
-                { "string", SpecialType.System_String },
-            };
-
-            public SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
-            {
-                if (SpecialTypesMap.ContainsKey(Name))
-                {
-                    return syntaxGenerator.TypeExpression(SpecialTypesMap[Name]);
-                }
-
-                return syntaxGenerator.IdentifierName(Name);
-            }
-        }
-
-
-        public class MethodDescription : ICanConvertToSyntaxNode
-        {
-            public TypeName ReturnType { get; set; }
-            public string Name { get; set; }
-            public IList<Parameter> Parameters { get; set; }
-            public Accessibility Accessibility { get; set; }
-
-            public MethodDescription()
-            {
-                Parameters = new List<Parameter>();
-            }
-
-            public SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
-            {
-                var parametersSyntaxNodes = Parameters.Select(parameter => parameter.ToSyntaxNode(syntaxGenerator));
-
-                return syntaxGenerator.MethodDeclaration(Name, parametersSyntaxNodes, 
-                    returnType: ReturnType.ToSyntaxNode(syntaxGenerator), 
-                    accessibility: Accessibility);
-            }
-        }
-
-        public class Type : ICanConvertToSyntaxNode
-        {
-            protected string _name;
-            public IList<MethodDescription> Methods { get; set; }
-            public IList<Type> InternalTypes { get; set; }
-            public Accessibility Accessibility { get; set; }
-
-            public virtual string Name
-            {
-                get { return _name; }
-                set { _name = value; }
-            }
-
-            public Type()
-            {
-                Methods = new List<MethodDescription>();
-                InternalTypes = new List<Type>();
-            }
-
-            public virtual SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
-            {
-                var methodsSyntaxNodes = Methods.Select(method => method.ToSyntaxNode(syntaxGenerator));
-                var internalTypesSyntaxNodes = InternalTypes.Select(internalType => internalType.ToSyntaxNode(syntaxGenerator));
-
-                return syntaxGenerator.ClassDeclaration(Name, accessibility: Accessibility, members: methodsSyntaxNodes.Union(internalTypesSyntaxNodes));
-            }
-        }
-
-        public class Interface : Type
-        {
-            public override string Name
-            {
-                get { return String.Concat("I", _name); }
-            }
-
-            public override SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
-            {
-                var methodsSyntaxNodes = Methods.Select(method => method.ToSyntaxNode(syntaxGenerator));
-
-                return syntaxGenerator.InterfaceDeclaration(Name, accessibility: Accessibility, members: methodsSyntaxNodes);
-            }
-        }
-
-        public class CodeFile
-        {
-            public IList<string> Usings { get; set; }
-            public string Namespace { get; set; }
-            public IList<Type> Types { get; set; }
-
-            public CodeFile()
-            {
-                Usings = new List<string>();
-                Types = new List<Type>();
-            }
-        }
-
         private const string TransitionsClassNameSufix = "Transitions";
 
         public CodeFile TranslateGraphToCodeFile(Graph graph)
@@ -286,7 +158,7 @@ namespace Ullikummi.CodeGeneration
             var name = graph.GetName();
             var accessibility = graph.GetAccessibility();
 
-            var transitionsClass = new Type()
+            var transitionsClass = new Objective.Roslyn.Code.Type()
             {
                 Name = String.Concat(name, TransitionsClassNameSufix),
                 Accessibility = accessibility
