@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Ullikummi.Data;
 
-namespace Ullikummi.CodeGeneration
+namespace Ullikummi.CodeGeneration.Objective.Roslyn
 {
     public class VisualBasicCodeGenerator : ICodeGenerator
     {

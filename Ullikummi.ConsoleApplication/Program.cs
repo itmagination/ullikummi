@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Ullikummi.CodeGeneration;
+using Ullikummi.CodeGeneration.Objective.Roslyn;
 
 namespace Ullikummi
 {
