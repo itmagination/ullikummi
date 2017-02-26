@@ -86,6 +86,10 @@
       <Project>{9a7093b4-06eb-4a50-b024-1fbfefdf9f4e}</Project>
       <Name>Ullikummi.CodeGeneration</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Ullikummi.Core\Ullikummi.Core.csproj">
+      <Project>{c25e268c-717b-4b53-9c0e-168c38f29b3e}</Project>
+      <Name>Ullikummi.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Ullikummi.DataReader\Ullikummi.DataReader.csproj">
       <Project>{c0458994-dcf6-498d-95db-cab4f69504d1}</Project>
       <Name>Ullikummi.DataReader</Name>

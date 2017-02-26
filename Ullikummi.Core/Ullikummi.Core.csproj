@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F7B44CCF-ECCA-40AD-9A99-0BDBC0F3CF41}</ProjectGuid>
+    <ProjectGuid>{C25E268C-717B-4B53-9C0E-168C38F29B3E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Ullikummi.Data</RootNamespace>
-    <AssemblyName>Ullikummi.Data</AssemblyName>
+    <RootNamespace>Ullikummi.Core</RootNamespace>
+    <AssemblyName>Ullikummi.Core</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -41,17 +40,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Connections\Connection.cs" />
-    <Compile Include="Graph.cs" />
-    <Compile Include="Edges\Edge.cs" />
-    <Compile Include="Nodes\Node.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Ullikummi.Core\Ullikummi.Core.csproj">
-      <Project>{c25e268c-717b-4b53-9c0e-168c38f29b3e}</Project>
-      <Name>Ullikummi.Core</Name>
-    </ProjectReference>
+    <None Include="paket.references" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

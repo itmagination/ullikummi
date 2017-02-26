@@ -57,6 +57,10 @@
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Ullikummi.Core\Ullikummi.Core.csproj">
+      <Project>{c25e268c-717b-4b53-9c0e-168c38f29b3e}</Project>
+      <Name>Ullikummi.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Ullikummi.Data\Ullikummi.Data.csproj">
       <Project>{f7b44ccf-ecca-40ad-9a99-0bdbc0f3cf41}</Project>
       <Name>Ullikummi.Data</Name>
