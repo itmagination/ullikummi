@@ -44,6 +44,7 @@
     <Compile Include="Connections\Connection.cs" />
     <Compile Include="Graph.cs" />
     <Compile Include="Edges\Edge.cs" />
+    <Compile Include="GraphConst.cs" />
     <Compile Include="Nodes\Node.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
