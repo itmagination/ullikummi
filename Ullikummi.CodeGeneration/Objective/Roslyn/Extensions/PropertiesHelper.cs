@@ -8,6 +8,8 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Extensions
 {
     internal static class PropertiesHelper
     {
+        public const string DefaultReturn = "void";
+
         public static string GetName(IConfigurable configurable)
         {
             if (!configurable.Properties.ContainsKey(GraphConst.Properties.Name))
@@ -22,7 +24,7 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Extensions
         {
             if (!configurable.Properties.ContainsKey(GraphConst.Properties.Return))
             {
-                throw new ApplicationException($"Return was not defined.");
+                return DefaultReturn;
             }
 
             return configurable.Properties[GraphConst.Properties.Return];

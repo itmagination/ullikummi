@@ -24,12 +24,16 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
                 { "object", SpecialType.System_Object },
                 { "short", SpecialType.System_Int16 },
                 { "ushort", SpecialType.System_UInt16 },
-                { "string", SpecialType.System_String },
-                { "void", SpecialType.System_Void }
+                { "string", SpecialType.System_String }
             };
 
         public SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
         {
+            if (Name.Equals("void"))
+            {
+                return null;
+            }
+
             if (SpecialTypesMap.ContainsKey(Name))
             {
                 return syntaxGenerator.TypeExpression(SpecialTypesMap[Name]);

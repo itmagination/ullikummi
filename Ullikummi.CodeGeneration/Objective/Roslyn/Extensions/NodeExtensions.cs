@@ -6,8 +6,6 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Extensions
 {
     internal static class NodeExtensions
     {
-        public const string DefaultReturn = "void";
-
         public static string GetName(this Node node)
         {
             return PropertiesHelper.GetName(node);
