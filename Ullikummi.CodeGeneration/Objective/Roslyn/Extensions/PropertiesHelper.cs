@@ -18,6 +18,16 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Extensions
             return configurable.Properties[GraphConst.Properties.Name];
         }
 
+        public static string GetReturn(IConfigurable configurable)
+        {
+            if (!configurable.Properties.ContainsKey(GraphConst.Properties.Return))
+            {
+                throw new ApplicationException($"Return was not defined.");
+            }
+
+            return configurable.Properties[GraphConst.Properties.Return];
+        }
+
         public static IList<ParameterPair> GetParameters(IConfigurable configurable)
         {
             if (!configurable.Properties.ContainsKey(GraphConst.Properties.Parameters))

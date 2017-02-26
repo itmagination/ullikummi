@@ -54,13 +54,9 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn
 
                 var @interface = SafeGetStartNodeTypeInterface(interfaces, edge);
 
-                if (edge.End.IsEnd)
-                {
-                    //TODO
-                    continue;
-                }
+                var method = edge.End.IsEnd ? GetEndStateTransitionMethodDescription(edge) 
+                    : GetInternalTransitionMethodDescription(edge);
 
-                var method = GetInternalTransitionMethodDescription(edge);
                 @interface.Methods.Add(method);
             }
 
@@ -70,6 +66,20 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn
             }
 
             return transitionsClass;
+        }
+
+        private static MethodDescription GetEndStateTransitionMethodDescription(Edge edge)
+        {
+            var method = new MethodDescription()
+            {
+                Name = edge.End.GetName(),
+                ReturnType = new TypeName() { Name = edge.End.GetReturn() }
+            };
+
+            var parameterPairs = edge.End.GetParameters();
+            method.Parameters = parameterPairs.Select(ConvertToParameter).ToList();
+
+            return method;
         }
 
         private static MethodDescription GetInternalTransitionMethodDescription(Edge edge)

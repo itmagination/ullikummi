@@ -25,6 +25,7 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
                 { "short", SpecialType.System_Int16 },
                 { "ushort", SpecialType.System_UInt16 },
                 { "string", SpecialType.System_String },
+                { "void", SpecialType.System_Void }
             };
 
         public SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
