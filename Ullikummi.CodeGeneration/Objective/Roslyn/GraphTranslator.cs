@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Ullikummi.Data;
+using Ullikummi.Data.Edges;
 using Ullikummi.CodeGeneration.Objective.Roslyn.Code;
 using Ullikummi.CodeGeneration.Objective.Roslyn.Extensions;
 
@@ -23,15 +25,23 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn
             codeFile.Usings = graph.GetUsings();
             codeFile.Namespace = graph.GetNamespace();
 
+            var transitionsClass = CreateTransitionsClass(graph);
+
+            codeFile.Types.Add(transitionsClass);
+
+            return codeFile;
+        }
+
+        private static Code.Type CreateTransitionsClass(Graph graph)
+        {
             var name = graph.GetName();
             var accessibility = graph.GetAccessibility();
 
-            var transitionsClass = new Objective.Roslyn.Code.Type()
+            var transitionsClass = new Code.Type()
             {
                 Name = String.Concat(name, TransitionsClassNameSufix),
                 Accessibility = accessibility
             };
-
 
             var interfaces = new Dictionary<string, Interface>();
 
@@ -42,41 +52,15 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn
                     continue;
                 }
 
+                var @interface = SafeGetStartNodeTypeInterface(interfaces, edge);
+
                 if (edge.End.IsEnd)
                 {
                     //TODO
                     continue;
                 }
 
-                if (!interfaces.ContainsKey(edge.Start.Identifier))
-                {
-                    interfaces.Add(edge.Start.Identifier, new Interface()
-                    {
-                        Name = edge.Start.Identifier,
-                        Accessibility = Accessibility.Public
-                    });
-                }
-
-                var @interface = interfaces[edge.Start.Identifier];
-
-                var method = new MethodDescription()
-                {
-                    Name = edge.Connection.GetName(),
-                    ReturnType = new TypeName() { Name = String.Concat("I", edge.End.Identifier) }
-                };
-
-                var parameterPairs = edge.Connection.GetParameters();
-
-                foreach (var parameterPair in parameterPairs)
-                {
-                    var parameter = new Parameter
-                    {
-                        Type = new TypeName() { Name = parameterPair.Type },
-                        Name = parameterPair.Name
-                    };
-                    method.Parameters.Add(parameter);
-                }
-
+                var method = GetInternalTransitionMethodDescription(edge);
                 @interface.Methods.Add(method);
             }
 
@@ -85,9 +69,46 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn
                 transitionsClass.InternalTypes.Add(@interface);
             }
 
-            codeFile.Types.Add(transitionsClass);
+            return transitionsClass;
+        }
 
-            return codeFile;
+        private static MethodDescription GetInternalTransitionMethodDescription(Edge edge)
+        {
+            var method = new MethodDescription()
+            {
+                Name = edge.Connection.GetName(),
+                ReturnType = new TypeName() { Name = String.Concat("I", edge.End.Identifier) }
+            };
+
+            var parameterPairs = edge.Connection.GetParameters();
+            method.Parameters = parameterPairs.Select(ConvertToParameter).ToList();
+
+            return method;
+        }
+
+        private static Interface SafeGetStartNodeTypeInterface(IDictionary<string, Interface> interfaces, Edge edge)
+        {
+            if (!interfaces.ContainsKey(edge.Start.Identifier))
+            {
+                interfaces.Add(edge.Start.Identifier, new Interface()
+                {
+                    Name = edge.Start.Identifier,
+                    Accessibility = Accessibility.Public
+                });
+            }
+
+            var @interface = interfaces[edge.Start.Identifier];
+
+            return @interface;
+        }
+
+        private static Parameter ConvertToParameter(ParameterPair parameterPair)
+        {
+            return new Parameter()
+            {
+                Type = new TypeName() { Name = parameterPair.Type },
+                Name = parameterPair.Name
+            };
         }
     }
 }
