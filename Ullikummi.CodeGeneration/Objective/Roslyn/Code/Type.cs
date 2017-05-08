@@ -11,6 +11,7 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
         public IList<MethodDescription> Methods { get; set; }
         public IList<Type> InternalTypes { get; set; }
         public Accessibility Accessibility { get; set; }
+        public IList<TypeName> BaseTypes { get; set; }
 
         public virtual string Name
         {
@@ -22,6 +23,7 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
         {
             Methods = new List<MethodDescription>();
             InternalTypes = new List<Type>();
+            BaseTypes = new List<TypeName>();
         }
 
         public virtual SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
@@ -29,7 +31,17 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
             var methodsSyntaxNodes = Methods.Select(method => method.ToSyntaxNode(syntaxGenerator));
             var internalTypesSyntaxNodes = InternalTypes.Select(internalType => internalType.ToSyntaxNode(syntaxGenerator));
 
-            return syntaxGenerator.ClassDeclaration(Name, accessibility: Accessibility, members: methodsSyntaxNodes.Union(internalTypesSyntaxNodes));
+            var typeSyntaxNode = syntaxGenerator.ClassDeclaration(Name, accessibility: Accessibility, members: methodsSyntaxNodes.Union(internalTypesSyntaxNodes));
+
+            foreach(var baseType in BaseTypes)
+            {
+                var baseTypeSyntaxNode = baseType.ToSyntaxNode(syntaxGenerator);
+                typeSyntaxNode = syntaxGenerator.AddBaseType(typeSyntaxNode, baseTypeSyntaxNode);
+            }
+
+            syntaxGenerator.AddMembers(typeSyntaxNode, Methods.Select(method => method.ToSyntaxNode(syntaxGenerator)));
+
+            return typeSyntaxNode;
         }
     }
 }

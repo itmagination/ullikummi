@@ -11,6 +11,7 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
         public string Name { get; set; }
         public IList<Parameter> Parameters { get; set; }
         public Accessibility Accessibility { get; set; }
+        public bool IsEndStateTransition { get; set; }
 
         public MethodDescription()
         {

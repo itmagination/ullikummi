@@ -6,7 +6,19 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
 {
     internal class TypeName : ICanConvertToSyntaxNode
     {
-        public string Name { get; set; }
+        public string Name { get; private set; }
+
+        private TypeName()
+        {
+        }
+
+        public static TypeName CreateTypeName(string name)
+        {
+            return new TypeName()
+            {
+                Name = name
+            };
+        }
 
         private static readonly IReadOnlyDictionary<string, SpecialType> SpecialTypesMap = new Dictionary<string, SpecialType>
             {

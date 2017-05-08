@@ -23,8 +23,8 @@ namespace Ullikummi
 
             Console.WriteLine();
             Console.WriteLine(csharpCodeGenerator.GenerateCode(graph));
-            Console.WriteLine();
-            Console.WriteLine(visualBasicCodeGenerator.GenerateCode(graph));
+            //Console.WriteLine();
+            //Console.WriteLine(visualBasicCodeGenerator.GenerateCode(graph));
         }
     }
 }
