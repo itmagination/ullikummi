@@ -15,6 +15,7 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn
     internal class GraphTranslator
     {
         private const string TransitionsClassNameSufix = "Transitions";
+        private const string StartConnectionTransitionInternalMethodNameSufix = "Internal";
 
         public static CodeFile TranslateGraphToCodeFile(Graph graph)
         {
@@ -68,66 +69,112 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn
             return returnTypes.Values.ToList();
         }
 
+        private static IList<MethodDescription> TranslateStartEdgeToVirtualTransitionMethodDescriptions(Graph graph, Edge edge)
+        {
+            var virtualTransitionMethodDescriptions = new List<MethodDescription>();
+
+            var internalMethodName = String.Concat(edge.Connection.GetName(), StartConnectionTransitionInternalMethodNameSufix);
+
+            var parameterPairs = edge.Connection.GetParameters();
+
+            var internalMethod = new MethodDescription()
+            {
+                Name = internalMethodName,
+                ReturnType = TypeName.Void(),
+                Accessibility = Accessibility.Protected,
+                DeclarationModifiers = DeclarationModifiers.Virtual
+            };
+            internalMethod.Parameters = parameterPairs.Select(ConvertToParameter).ToList();
+            virtualTransitionMethodDescriptions.Add(internalMethod);
+
+            var method = new MethodDescription()
+            {
+                Name = edge.Connection.GetName(),
+                ReturnType = TypeName.CreateTypeName(String.Concat(GetTransitionClassName(graph), ".", String.Concat("I", edge.End.Identifier))),
+                Accessibility = Accessibility.Public,
+                Parameters = internalMethod.Parameters
+            };
+
+            method.StatementsBuilders.Add(syntaxGenerator => GenerateInvokeMethodSyntaxNode(syntaxGenerator, internalMethodName, parameterPairs));
+            method.StatementsBuilders.Add(syntaxGenerator => syntaxGenerator.ReturnStatement(syntaxGenerator.ThisExpression()));
+
+            virtualTransitionMethodDescriptions.Add(method);
+
+            return virtualTransitionMethodDescriptions;
+        }
+
+        private static SyntaxNode GenerateInvokeMethodSyntaxNode(SyntaxGenerator syntaxGenerator, string methodName, IList<ParameterPair> parameters)
+        {
+            return syntaxGenerator.InvocationExpression(syntaxGenerator.IdentifierName(methodName), 
+                parameters.Select(parameter => syntaxGenerator.IdentifierName(parameter.Name)));
+        }
+
+        private static MethodDescription TranslateEndStateToVirtualTransitionMethodDescription(Node end)
+        {
+            var method = new MethodDescription()
+            {
+                Name = end.GetName(),
+                ReturnType = TypeName.CreateTypeName(end.GetReturn()),
+                Accessibility = Accessibility.Protected,
+                DeclarationModifiers = DeclarationModifiers.Virtual,
+                IsEndStateTransition = true
+            };
+
+            var endParameterPairs = end.GetParameters();
+            method.Parameters = endParameterPairs.Select(ConvertToParameter).ToList();
+
+            method.StatementsBuilders.Add(
+                (syntaxGenerator) => syntaxGenerator.ReturnStatement(syntaxGenerator.DefaultExpression(method.ReturnType.ToSyntaxNode(syntaxGenerator))));
+
+            return method;
+        }
+
+        private static MethodDescription TranslateTransitionConnectionToVirtualTransitionMethodDescription(Connection connection)
+        {
+            var method = new MethodDescription()
+            {
+                Name = connection.GetName(),
+                ReturnType = TypeName.Void(),
+                Accessibility = Accessibility.Protected,
+                DeclarationModifiers = DeclarationModifiers.Virtual
+            };
+
+            var parameterPairs = connection.GetParameters();
+            method.Parameters = parameterPairs.Select(ConvertToParameter).ToList();
+
+            return method;
+        }
+
         private static IList<MethodDescription> GetVirtualTransitionMethodsDescription(Graph graph)
         {
-            var methodDescriptions = new List<MethodDescription>();
-
-            var usedConnections = new HashSet<Connection>();
-            var usedEndStates = new HashSet<Node>();
+            var startConnections = new Dictionary<Connection, Edge>();
+            var endStates = new HashSet<Node>();
+            var transitionConnections = new HashSet<Connection>();
 
             foreach (var edge in graph.Edges)
             {
                 if (edge.Start.IsStart)
                 {
-                    //TODO
-                    continue;
-                }
-                if(edge.End.IsEnd)
-                {
-                    var end = edge.End;
-                    if (usedEndStates.Contains(end))
+                    if(!startConnections.ContainsKey(edge.Connection))
                     {
-                        continue;
+                        startConnections.Add(edge.Connection, edge);
                     }
-                    usedEndStates.Add(end);
-
-                    var endMethod = new MethodDescription()
-                    {
-                        Name = end.GetName(),
-                        ReturnType = TypeName.CreateTypeName(end.GetReturn()),
-                        Accessibility = Accessibility.Protected,
-                        DeclarationModifiers = DeclarationModifiers.Virtual,
-                        IsEndStateTransition = true
-                    };
-
-                    var endParameterPairs = end.GetParameters();
-                    endMethod.Parameters = endParameterPairs.Select(ConvertToParameter).ToList();
-
-                    methodDescriptions.Add(endMethod);
-
-                    continue;
                 }
-
-                var connection = edge.Connection;
-                if(usedConnections.Contains(connection))
+                else if(edge.End.IsEnd)
                 {
-                    continue;
+                    endStates.Add(edge.End);
                 }
-                usedConnections.Add(connection);
-
-                var method = new MethodDescription()
+                else
                 {
-                    Name = connection.GetName(),
-                    ReturnType = TypeName.Void(),
-                    Accessibility = Accessibility.Protected,
-                    DeclarationModifiers = DeclarationModifiers.Virtual
-                };
-
-                var parameterPairs = connection.GetParameters();
-                method.Parameters = parameterPairs.Select(ConvertToParameter).ToList();
-
-                methodDescriptions.Add(method);
+                    transitionConnections.Add(edge.Connection);
+                }
             }
+
+            var methodDescriptions = new List<MethodDescription>();
+
+            methodDescriptions.AddRange(startConnections.Values.SelectMany(startEdge => TranslateStartEdgeToVirtualTransitionMethodDescriptions(graph, startEdge)));
+            methodDescriptions.AddRange(endStates.Select(TranslateEndStateToVirtualTransitionMethodDescription));
+            methodDescriptions.AddRange(transitionConnections.Select(TranslateTransitionConnectionToVirtualTransitionMethodDescription));
 
             return methodDescriptions;
         }
