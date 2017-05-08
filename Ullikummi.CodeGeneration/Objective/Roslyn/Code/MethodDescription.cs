@@ -11,6 +11,9 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
         public string Name { get; set; }
         public IList<Parameter> Parameters { get; set; }
         public Accessibility Accessibility { get; set; }
+        public DeclarationModifiers DeclarationModifiers { get; set; }
+
+        //TODO [WS] Remove this frome here - makes no sense.
         public bool IsEndStateTransition { get; set; }
 
         public MethodDescription()
@@ -22,9 +25,12 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
         {
             var parametersSyntaxNodes = Parameters.Select(parameter => parameter.ToSyntaxNode(syntaxGenerator));
 
-            return syntaxGenerator.MethodDeclaration(Name, parametersSyntaxNodes,
+            var methodSyntaxNode = syntaxGenerator.MethodDeclaration(Name, parametersSyntaxNodes,
                 returnType: ReturnType.ToSyntaxNode(syntaxGenerator),
-                accessibility: Accessibility);
+                accessibility: Accessibility, 
+                modifiers: DeclarationModifiers);
+
+            return methodSyntaxNode;
         }
     }
 }

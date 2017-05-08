@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Editing;
 using Ullikummi.Data;
+using Ullikummi.Data.Connections;
 using Ullikummi.Data.Edges;
+using Ullikummi.Data.Nodes;
 using Ullikummi.CodeGeneration.Objective.Roslyn.Code;
 using Ullikummi.CodeGeneration.Objective.Roslyn.Extensions;
 
@@ -31,7 +34,102 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn
             var builderClass = CreateBuilderClass(graph);
             codeFile.Types.Add(builderClass);
 
+            var returnTypes = GetReturnTypes(graph);
+            foreach(var returnType in returnTypes)
+            {
+                codeFile.Types.Add(returnType);
+            }
+
             return codeFile;
+        }
+
+        private static IList<Code.Type> GetReturnTypes(Graph graph)
+        {
+            var returnTypes = new Dictionary<string, Code.Type>();
+
+            foreach (var edge in graph.Edges)
+            {
+                if (edge.End.IsEnd)
+                {
+                    if(!returnTypes.ContainsKey(edge.End.GetReturn()))
+                    {
+                        var returnType = new Code.Type()
+                        {
+                            Name = edge.End.GetReturn(),
+                            Accessibility = graph.GetAccessibility(),
+                        };
+
+                        returnTypes.Add(returnType.Name, returnType);
+                    }
+                }
+
+            }
+
+            return returnTypes.Values.ToList();
+        }
+
+        private static IList<MethodDescription> GetVirtualTransitionMethodsDescription(Graph graph)
+        {
+            var methodDescriptions = new List<MethodDescription>();
+
+            var usedConnections = new HashSet<Connection>();
+            var usedEndStates = new HashSet<Node>();
+
+            foreach (var edge in graph.Edges)
+            {
+                if (edge.Start.IsStart)
+                {
+                    //TODO
+                    continue;
+                }
+                if(edge.End.IsEnd)
+                {
+                    var end = edge.End;
+                    if (usedEndStates.Contains(end))
+                    {
+                        continue;
+                    }
+                    usedEndStates.Add(end);
+
+                    var endMethod = new MethodDescription()
+                    {
+                        Name = end.GetName(),
+                        ReturnType = TypeName.CreateTypeName(end.GetReturn()),
+                        Accessibility = Accessibility.Protected,
+                        DeclarationModifiers = DeclarationModifiers.Virtual,
+                        IsEndStateTransition = true
+                    };
+
+                    var endParameterPairs = end.GetParameters();
+                    endMethod.Parameters = endParameterPairs.Select(ConvertToParameter).ToList();
+
+                    methodDescriptions.Add(endMethod);
+
+                    continue;
+                }
+
+                var connection = edge.Connection;
+                if(usedConnections.Contains(connection))
+                {
+                    continue;
+                }
+                usedConnections.Add(connection);
+
+                var method = new MethodDescription()
+                {
+                    Name = connection.GetName(),
+                    ReturnType = TypeName.Void(),
+                    Accessibility = Accessibility.Protected,
+                    DeclarationModifiers = DeclarationModifiers.Virtual
+                };
+
+                var parameterPairs = connection.GetParameters();
+                method.Parameters = parameterPairs.Select(ConvertToParameter).ToList();
+
+                methodDescriptions.Add(method);
+            }
+
+            return methodDescriptions;
         }
 
         private static Code.Type CreateBuilderClass(Graph graph)
@@ -43,10 +141,16 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn
             {
                 Name = name,
                 Accessibility = accessibility,
-                
             };
 
             var interfaces = GetInterfacesDictionary(graph);
+
+            var virtualTransitionMethodsDescription = GetVirtualTransitionMethodsDescription(graph);
+            
+            foreach(var transitionMethod in virtualTransitionMethodsDescription)
+            {
+                builderClass.Methods.Add(transitionMethod);
+            }
 
             foreach (var @interface in interfaces.Values)
             {

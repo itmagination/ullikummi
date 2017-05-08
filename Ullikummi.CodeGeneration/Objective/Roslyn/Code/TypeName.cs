@@ -6,6 +6,8 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
 {
     internal class TypeName : ICanConvertToSyntaxNode
     {
+        private const string VoidTypeName = "void";
+
         public string Name { get; private set; }
 
         private TypeName()
@@ -18,6 +20,11 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
             {
                 Name = name
             };
+        }
+
+        public static TypeName Void()
+        {
+            return CreateTypeName(VoidTypeName);
         }
 
         private static readonly IReadOnlyDictionary<string, SpecialType> SpecialTypesMap = new Dictionary<string, SpecialType>
@@ -41,7 +48,7 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
 
         public SyntaxNode ToSyntaxNode(SyntaxGenerator syntaxGenerator)
         {
-            if (Name.Equals("void"))
+            if (Name.Equals(VoidTypeName))
             {
                 return null;
             }
