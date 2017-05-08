@@ -95,7 +95,7 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn
                 Parameters = internalMethod.Parameters
             };
 
-            method.StatementsBuilders.Add(syntaxGenerator => GenerateInvokeMethodSyntaxNode(syntaxGenerator, internalMethodName, parameterPairs));
+            method.StatementsBuilders.Add(syntaxGenerator => GenerateInvokeMethodSyntaxNode(syntaxGenerator, internalMethodName, internalMethod.Parameters.Select(parameter => parameter.Name)));
             method.StatementsBuilders.Add(syntaxGenerator => syntaxGenerator.ReturnStatement(syntaxGenerator.ThisExpression()));
 
             virtualTransitionMethodDescriptions.Add(method);
@@ -103,10 +103,10 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn
             return virtualTransitionMethodDescriptions;
         }
 
-        private static SyntaxNode GenerateInvokeMethodSyntaxNode(SyntaxGenerator syntaxGenerator, string methodName, IList<ParameterPair> parameters)
+        private static SyntaxNode GenerateInvokeMethodSyntaxNode(SyntaxGenerator syntaxGenerator, string methodName, IEnumerable<string> arguments)
         {
-            return syntaxGenerator.InvocationExpression(syntaxGenerator.IdentifierName(methodName), 
-                parameters.Select(parameter => syntaxGenerator.IdentifierName(parameter.Name)));
+            return syntaxGenerator.InvocationExpression(syntaxGenerator.IdentifierName(methodName),
+                arguments.Select(argument => syntaxGenerator.IdentifierName(argument)));
         }
 
         private static MethodDescription TranslateEndStateToVirtualTransitionMethodDescription(Node end)
@@ -205,14 +205,31 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn
 
                 foreach(var method in @interface.Methods)
                 {
-                    var methodDescription = new MethodDescription()
+                    MethodDescription methodDescription = null;
+                    if (method.IsEndStateTransition)
                     {
-                        Name = String.Concat(GetTransitionClassName(graph), ".", @interface.Name, ".", method.Name),
-                        ReturnType = TypeName.CreateTypeName(
-                            method.IsEndStateTransition ? method.ReturnType.Name 
-                            : String.Concat(GetTransitionClassName(graph), ".", method.ReturnType.Name)),
-                        Parameters = method.Parameters.ToList()
-                    };
+                        methodDescription = new MethodDescription()
+                        {
+                            Name = String.Concat(GetTransitionClassName(graph), ".", @interface.Name, ".", method.Name),
+                            ReturnType = TypeName.CreateTypeName(method.ReturnType.Name),
+                            Parameters = method.Parameters.ToList()
+                        };
+
+                        methodDescription.StatementsBuilders.Add(syntaxGenerator =>
+                            syntaxGenerator.ReturnStatement(GenerateInvokeMethodSyntaxNode(syntaxGenerator, method.Name, method.Parameters.Select(parameter => parameter.Name))));
+                    }
+                    else
+                    {
+                        methodDescription = new MethodDescription()
+                        {
+                            Name = String.Concat(GetTransitionClassName(graph), ".", @interface.Name, ".", method.Name),
+                            ReturnType = TypeName.CreateTypeName(String.Concat(GetTransitionClassName(graph), ".", method.ReturnType.Name)),
+                            Parameters = method.Parameters.ToList()
+                        };
+
+                        methodDescription.StatementsBuilders.Add(syntaxGenerator => GenerateInvokeMethodSyntaxNode(syntaxGenerator, method.Name, method.Parameters.Select(parameter => parameter.Name)));
+                        methodDescription.StatementsBuilders.Add(syntaxGenerator => syntaxGenerator.ReturnStatement(syntaxGenerator.ThisExpression()));
+                    }
 
                     builderClass.Methods.Add(methodDescription);
                 }

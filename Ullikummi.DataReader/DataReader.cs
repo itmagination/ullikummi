@@ -13,7 +13,6 @@ namespace Ullikummi.DataReader
             var tokens = new CommonTokenStream(lexer);
             var parser = new DataFileGrammarParser(tokens);
             var tree = parser.data();
-            //Console.WriteLine(tree.ToStringTree(parser));
             var visitor = new DataFileGrammarVisitor();
 
             return visitor.Visit(tree);

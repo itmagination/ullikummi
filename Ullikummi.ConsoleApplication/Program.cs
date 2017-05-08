@@ -8,8 +8,6 @@ namespace Ullikummi
     {
         private static void Main(string[] args)
         {
-            Console.WriteLine("Ullikummi!");
-
             var data = File.ReadAllText(args[0]);
 
             var dataReader = new DataReader.DataReader();
@@ -18,8 +16,6 @@ namespace Ullikummi
 
             var csharpCodeGenerator = new CSharpCodeGenerator();
             var visualBasicCodeGenerator = new VisualBasicCodeGenerator();
-
-            Console.WriteLine("Ullikummi!");
 
             Console.WriteLine();
             Console.WriteLine(csharpCodeGenerator.GenerateCode(graph));
