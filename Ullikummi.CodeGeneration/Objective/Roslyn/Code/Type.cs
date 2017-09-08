@@ -12,6 +12,7 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
         public IList<Type> InternalTypes { get; set; }
         public Accessibility Accessibility { get; set; }
         public IList<TypeName> BaseTypes { get; set; }
+        public bool IsPartial { get; set; }
 
         public virtual string Name
         {
@@ -31,7 +32,12 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn.Code
             var methodsSyntaxNodes = Methods.Select(method => method.ToSyntaxNode(syntaxGenerator));
             var internalTypesSyntaxNodes = InternalTypes.Select(internalType => internalType.ToSyntaxNode(syntaxGenerator));
 
-            var typeSyntaxNode = syntaxGenerator.ClassDeclaration(Name, accessibility: Accessibility, members: methodsSyntaxNodes.Union(internalTypesSyntaxNodes));
+            var declarationModifiers = DeclarationModifiers.None.WithPartial(IsPartial);
+
+            var typeSyntaxNode = syntaxGenerator.ClassDeclaration(Name, 
+                accessibility: Accessibility, 
+                modifiers: declarationModifiers,
+                members: methodsSyntaxNodes.Union(internalTypesSyntaxNodes));
 
             foreach(var baseType in BaseTypes)
             {

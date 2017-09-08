@@ -58,6 +58,7 @@ namespace Ullikummi.CodeGeneration.Objective.Roslyn
                         {
                             Name = edge.End.GetReturn(),
                             Accessibility = graph.GetAccessibility(),
+                            IsPartial = true
                         };
 
                         returnTypes.Add(returnType.Name, returnType);
