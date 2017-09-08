@@ -20,14 +20,14 @@ Gamma -> Empty [gamma]
 Gamma -> $end
 Empty -> $end
 
-$end [name=Build,return=Identity]
+$end [name=ReturnIdentity,return=Identity]
 
-alpha [name=Alpha,params=string#name;string#surname]
-beta [name=Beta,params=string#address]
-gamma [name=Gamma,params=string#phoneNumber]
+alpha [name=SetName,params=string#name;string#surname]
+beta [name=SetAddress,params=string#address]
+gamma [name=SetPhoneNumber,params=string#phoneNumber]
 configure [name=Configure]
 
-namespace Ullikummi.FluentApi
+namespace Ullikummi.TestApp
 name IdentityBuilder
 accessibility internal
 using System
